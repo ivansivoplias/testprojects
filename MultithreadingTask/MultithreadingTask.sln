@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InformationFinder", "InformationFinder\InformationFinder.csproj", "{41EA0248-DF3C-4A30-9D76-C4EEB9B0D9E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Test\Tests.csproj", "{5ABB6BEA-FF92-4C7A-934B-D37F2D538586}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{41EA0248-DF3C-4A30-9D76-C4EEB9B0D9E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41EA0248-DF3C-4A30-9D76-C4EEB9B0D9E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41EA0248-DF3C-4A30-9D76-C4EEB9B0D9E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41EA0248-DF3C-4A30-9D76-C4EEB9B0D9E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5ABB6BEA-FF92-4C7A-934B-D37F2D538586}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5ABB6BEA-FF92-4C7A-934B-D37F2D538586}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5ABB6BEA-FF92-4C7A-934B-D37F2D538586}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5ABB6BEA-FF92-4C7A-934B-D37F2D538586}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 3
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://dev-tfs:8080/tfs/studentprojects
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = InformationFinder\\InformationFinder.csproj
+		SccProjectName1 = InformationFinder
+		SccLocalPath1 = InformationFinder
+		SccProjectUniqueName2 = Test\\Tests.csproj
+		SccProjectName2 = Test
+		SccLocalPath2 = Test
+	EndGlobalSection
+EndGlobal
