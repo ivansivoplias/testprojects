@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Security;
 using System.Xml.Serialization;
 
 namespace SerializationTask
@@ -94,47 +93,25 @@ namespace SerializationTask
 
         public void SerializeDirectory()
         {
-            if (!string.IsNullOrEmpty(_directoryPath))
+            FolderInfo root = DirectoryHelper.GetDirectoryTree(_directoryPath);
+
+            if (_format == SerializationFormat.XML)
             {
-                FolderInfo root = null;
-                DirectoryInfo rootDir = null;
-                try
+                var xmlSerializer = new XmlSerializer(typeof(FolderInfo));
+                using (var stream = new StreamWriter(_outputFileName, false))
                 {
-                    rootDir = new DirectoryInfo(_directoryPath);
+                    xmlSerializer.Serialize(stream, root);
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine("An error occurs while serializing \"{0}\". Details: {1}", _directoryPath, e.Message);
-                    return;
-                }
-
-                root = new FolderInfo(rootDir.Name, rootDir.FullName, rootDir.CreationTime, null);
-                root.Files = DirectoryHelper.GetFiles(rootDir);
-
-                DirectoryHelper.GetDirectoryTree(root, rootDir);
-
-                if (_format == SerializationFormat.XML)
-                {
-                    var xmlSerializer = new XmlSerializer(typeof(FolderInfo));
-                    using (var stream = new StreamWriter(_outputFileName, false))
-                    {
-                        xmlSerializer.Serialize(stream, root);
-                    }
-                }
-                else
-                {
-                    var binSerializer = new BinaryFormatter();
-                    using (var stream = new FileStream(_outputFileName, FileMode.OpenOrCreate))
-                    {
-                        binSerializer.Serialize(stream, root);
-                    }
-                }
-                Console.WriteLine("Serialization successful!");
             }
             else
             {
-                Console.WriteLine("Directory cannot be serialized because directory path is empty.");
+                var binSerializer = new BinaryFormatter();
+                using (var stream = new FileStream(_outputFileName, FileMode.OpenOrCreate))
+                {
+                    binSerializer.Serialize(stream, root);
+                }
             }
+            Console.WriteLine("Serialization successful!");
         }
 
         private static bool CheckFileNameWithFormat(string fileName, string format)

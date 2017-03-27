@@ -64,7 +64,7 @@ namespace Tests
                 Directory.Delete(testFolderName, true);
                 File.Delete(testOutputFile);
             }
-            catch (Exception e)
+            catch
             {
                 return;
             }

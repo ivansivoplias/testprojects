@@ -6,7 +6,31 @@ namespace SerializationTask
 {
     public static class DirectoryHelper
     {
-        public static void GetDirectoryTree(FolderInfo tree, DirectoryInfo dirInfo)
+        public static FolderInfo GetDirectoryTree(string directoryPath)
+        {
+            FolderInfo root = null;
+            DirectoryInfo rootDir = null;
+            try
+            {
+                rootDir = new DirectoryInfo(directoryPath);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("An error occurs while serializing \"{0}\". Details: {1}", directoryPath, e.Message);
+            }
+
+            if (rootDir != null)
+            {
+                root = new FolderInfo(rootDir.Name, rootDir.FullName, rootDir.CreationTime, null);
+                root.Files = GetFiles(rootDir);
+
+                GetDirectoryTree(root, rootDir);
+            }
+
+            return root;
+        }
+
+        private static void GetDirectoryTree(FolderInfo tree, DirectoryInfo dirInfo)
         {
             DirectoryInfo[] directories = null;
             try
