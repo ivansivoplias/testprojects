@@ -57,7 +57,7 @@ namespace SerializationTask
             }
             else
             {
-                throw new Exception("File path is invalid.");
+                throw new ArgumentException("File path is invalid.");
             }
 
             return new DirectorySerializer(filePath, format);

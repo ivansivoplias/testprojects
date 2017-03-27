@@ -25,15 +25,15 @@ namespace Tests
 
             Directory.CreateDirectory(testFolderName);
 
-			for (int i = 0; i < 5; i++)
-			{
-				string dirName = FormatValues("folder #{0}", (i + 1).ToString());
-				string dirPath = FormatValues("{0}\\{1}", testFolderName, dirName);
+            for (int i = 0; i < 5; i++)
+            {
+                string dirName = FormatValues("folder #{0}", (i + 1).ToString());
+                string dirPath = FormatValues("{0}\\{1}", testFolderName, dirName);
 
-				var folder = new FolderInfo() { DirectoryName = dirName, FullPath = dirPath };
-				Directory.CreateDirectory(dirPath);
-				_testDirectory.AddChild(folder);
-			}
+                var folder = new FolderInfo() { DirectoryName = dirName, FullPath = dirPath };
+                Directory.CreateDirectory(dirPath);
+                _testDirectory.AddChild(folder);
+            }
         }
 
         [Test]
@@ -59,8 +59,15 @@ namespace Tests
         [OneTimeTearDown]
         public void TearDown()
         {
-            Directory.Delete(testFolderName, true);
-            File.Delete(testOutputFile);
+            try
+            {
+                Directory.Delete(testFolderName, true);
+                File.Delete(testOutputFile);
+            }
+            catch (Exception e)
+            {
+                return;
+            }
         }
 
         public string GetCurrentDirectory()

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -10,18 +8,14 @@ namespace InformationFinder
     public class InfoExtractor
     {
         private readonly string _sourceAddress;
-        private static readonly Regex _emailRegex = new Regex("[a-zA-Z0-9\\.\\-_]+@([a-z0-9\\-]\\.?)+\\.([a-z0-9\\-])+", RegexOptions.Compiled);
-        private static readonly Regex _htmlLink = new Regex(@"((http|ftp|https):\/\/|www\.|\/)([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?", RegexOptions.Compiled);
-        private static Regex _link = new Regex("(https?|ftp)://[^\\s/$.?#].[^\\s]*", RegexOptions.Compiled);
+        private const RegexOptions Options = RegexOptions.Compiled | RegexOptions.IgnoreCase;
+        private static readonly Regex _emailRegex = new Regex("[a-zA-Z0-9\\.\\-_]+@([a-z0-9\\-]\\.?)+\\.([a-z0-9\\-])+", Options);
+        private static readonly Regex _htmlLink = new Regex(@"((http|ftp|https):\/\/|www\.|\/)([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?", Options);
         private readonly object _lockObject = new object();
-
-        private readonly bool _inFile;
 
         private readonly string _line;
 
         private EventHandler<MatchFondedEventArgs> _matchFounded;
-
-        public static Regex Link => _link;
 
         public event EventHandler<MatchFondedEventArgs> MatchFounded
         {
@@ -44,19 +38,10 @@ namespace InformationFinder
             }
         }
 
-        private InfoExtractor(string source, bool inFile, List<EventHandler<MatchFondedEventArgs>> observers)
+        private InfoExtractor(string source, string data, List<EventHandler<MatchFondedEventArgs>> observers)
         {
             _sourceAddress = source;
-            _inFile = inFile;
-
-            if (_inFile)
-            {
-                _line = SearchFile();
-            }
-            else
-            {
-                _line = SearchUrl();
-            }
+            _line = data;
 
             foreach (var observer in observers)
             {
@@ -64,47 +49,9 @@ namespace InformationFinder
             }
         }
 
-        public static InfoExtractor Create(string source, bool? inFile, List<EventHandler<MatchFondedEventArgs>> observers)
+        public static InfoExtractor Create(string source, string data, List<EventHandler<MatchFondedEventArgs>> observers)
         {
-            if (inFile == null || !inFile.HasValue)
-            {
-                throw new ArgumentException("Invalid source path passed");
-            }
-
-            bool inFileSearch = inFile.Value;
-            return new InfoExtractor(source, inFileSearch, observers);
-        }
-
-        private string SearchUrl()
-        {
-            string result = null;
-            try
-            {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(_sourceAddress);
-                Stream responseStream = request.GetResponse().GetResponseStream();
-                result = new StreamReader(responseStream).ReadToEnd();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Something bad happened while reading from url {0}. See details below: \n{1}", _sourceAddress, e.Message);
-            }
-
-            return result;
-        }
-
-        private string SearchFile()
-        {
-            string line = null;
-            try
-            {
-                line = File.ReadAllText(_sourceAddress);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Something bad happened while reading from file: {0}. See details below: \n{1}", _sourceAddress, e.Message);
-            }
-
-            return line;
+            return new InfoExtractor(source, data, observers);
         }
 
         public void SearchEmails()
@@ -121,14 +68,12 @@ namespace InformationFinder
         {
             if (!string.IsNullOrEmpty(line))
             {
-                var matches = regex.Matches(line);
-                if (matches.Count > 0)
+                Match match = regex.Match(line);
+                while (match.Success)
                 {
-                    foreach (Match match in matches)
-                    {
-                        _matchFounded(this, new MatchFondedEventArgs(_sourceAddress, match.Value, type));
-                        Thread.Sleep(1);
-                    }
+                    _matchFounded(this, new MatchFondedEventArgs(_sourceAddress, match.Value, type));
+                    match = match.NextMatch();
+                    Thread.Sleep(1);
                 }
             }
             else
