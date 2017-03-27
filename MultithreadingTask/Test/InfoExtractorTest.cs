@@ -29,7 +29,7 @@ namespace Tests
 
             _rightLinksAndEmails = string.Join("", tempList);
 
-            _testFilename = GetCurrentDirectory() + "\\testfile.txt";
+            _testFilename = GetCurrentDirectory() + "\\Resources\\testInfo.txt";
         }
 
         public void TestObserver(object sender, MatchFondedEventArgs e)
@@ -42,15 +42,14 @@ namespace Tests
         {
             //Arrange
             _testData = new List<string>();
-            var infoExtractor = new InfoExtractorBuilder()
-                .SetSource(_testFilename)
-                .DetectSourceType()
-                .SetObservers(TestObserver)
-                .Build();
+            var infoExtractor = InfoExtractor.Create(_testFilename);
+            infoExtractor.MatchFounded += TestObserver;
 
             //Act
             infoExtractor.SearchEmails();
             infoExtractor.SearchLinks();
+
+            infoExtractor.MatchFounded -= TestObserver;
 
             _testData.Sort();
 

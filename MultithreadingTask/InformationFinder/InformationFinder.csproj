@@ -48,9 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InfoExtractor.cs" />
-    <Compile Include="InfoExtractorBuilder.cs" />
     <Compile Include="MatchFondedEventArgs.cs" />
-    <Compile Include="MatchType.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SearchObserver.cs" />

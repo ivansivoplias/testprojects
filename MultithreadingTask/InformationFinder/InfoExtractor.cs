@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -7,15 +9,25 @@ namespace InformationFinder
 {
     public class InfoExtractor
     {
-        private readonly string _sourceAddress;
-        private const RegexOptions Options = RegexOptions.Compiled | RegexOptions.IgnoreCase;
-        private static readonly Regex _emailRegex = new Regex("[a-zA-Z0-9\\.\\-_]+@([a-z0-9\\-]\\.?)+\\.([a-z0-9\\-])+", Options);
-        private static readonly Regex _htmlLink = new Regex(@"((http|ftp|https):\/\/|www\.|\/)([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?", Options);
-        private readonly object _lockObject = new object();
+        public const string LinkMatchType = "Link";
+        public const string EmailMatchType = "E-mail";
+        private const RegexOptions DefaultOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
-        private readonly string _line;
+        private static readonly Regex _emailRegex = new Regex("[a-zA-Z0-9\\.\\-_]+@([a-z0-9\\-]\\.?)+\\.([a-z0-9\\-])+", DefaultOptions);
+        private static readonly Regex _htmlLink = new Regex(@"((http|ftp|https):\/\/|www\.|\/)([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?", DefaultOptions);
+        private static readonly Regex _link = new Regex("(https?|ftp)://[^\\s/$.?#].[^\\s]*", DefaultOptions);
+
+        private readonly object _lockObject = new object();
+        private readonly string _sourceAddress;
+        private readonly string _sourceDataString;
 
         private EventHandler<MatchFondedEventArgs> _matchFounded;
+
+        private InfoExtractor(string source, string sourceData)
+        {
+            _sourceAddress = source;
+            _sourceDataString = sourceData;
+        }
 
         public event EventHandler<MatchFondedEventArgs> MatchFounded
         {
@@ -38,33 +50,74 @@ namespace InformationFinder
             }
         }
 
-        private InfoExtractor(string source, string data, List<EventHandler<MatchFondedEventArgs>> observers)
+        public static InfoExtractor Create(string source)
         {
-            _sourceAddress = source;
-            _line = data;
-
-            foreach (var observer in observers)
+            string resultStr;
+            if (File.Exists(source))
             {
-                MatchFounded += observer;
+                resultStr = ReadFromFile(source);
             }
-        }
+            else if (_link.IsMatch(source))
+            {
+                resultStr = ReadFromUrl(source);
+            }
+            else
+            {
+                throw new ArgumentException(string.Format("Invalid source {0} passed. Please input write source(file or url) and try again.", source));
+            }
 
-        public static InfoExtractor Create(string source, string data, List<EventHandler<MatchFondedEventArgs>> observers)
-        {
-            return new InfoExtractor(source, data, observers);
+            return new InfoExtractor(source, resultStr);
         }
 
         public void SearchEmails()
         {
-            SearchInLines(_line, _emailRegex, MatchType.Email);
+            SearchInLine(_sourceDataString, _emailRegex, EmailMatchType);
         }
 
         public void SearchLinks()
         {
-            SearchInLines(_line, _htmlLink, MatchType.Link);
+            SearchInLine(_sourceDataString, _htmlLink, LinkMatchType);
         }
 
-        private void SearchInLines(string line, Regex regex, MatchType type)
+        private static string ReadFromFile(string source)
+        {
+            string line = string.Empty;
+            try
+            {
+                line = File.ReadAllText(source);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Something bad happened while reading from file: {0}. See details below: \n{1}", source, e.Message);
+            }
+
+            return line;
+        }
+
+        private static string ReadFromUrl(string source)
+        {
+            string result = string.Empty;
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(source);
+            try
+            {
+                using (Stream responseStream = request.GetResponse().GetResponseStream())
+                {
+                    using (var streamReader = new StreamReader(responseStream))
+                    {
+                        result = streamReader.ReadToEnd();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Something gone wrong while reading from url.\nSee details below: \n{0}", e.Message);
+            }
+
+            return result;
+        }
+
+        private void SearchInLine(string line, Regex regex, string type)
         {
             if (!string.IsNullOrEmpty(line))
             {

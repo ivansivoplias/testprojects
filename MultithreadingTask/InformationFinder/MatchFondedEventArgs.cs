@@ -8,9 +8,9 @@ namespace InformationFinder
 
         public string Founded { get; }
 
-        public MatchType Match { get; }
+        public string Match { get; }
 
-        public MatchFondedEventArgs(string source, string founded, MatchType match)
+        public MatchFondedEventArgs(string source, string founded, string match)
         {
             Source = source;
             Founded = founded;

@@ -12,9 +12,8 @@ namespace InformationFinder
             Console.InputEncoding = Encoding.GetEncoding("windows-1251");
             bool exit = false;
             string source = null;
-            InfoExtractorBuilder builder;
             InfoExtractor extractor = null;
-            SearchObserver observer;
+            SearchObserver observer = SearchObserver.Create();
 
             do
             {
@@ -30,16 +29,11 @@ namespace InformationFinder
 
                 if (!exit)
                 {
-                    builder = new InfoExtractorBuilder();
-                    observer = SearchObserver.Create();
                     extractor = null;
 
                     try
                     {
-                        extractor = builder.SetSource(source)
-                            .DetectSourceType()
-                            .SetObservers(observer.OnMatchFounded)
-                            .Build();
+                        extractor = InfoExtractor.Create(source);
                     }
                     catch (Exception e)
                     {
@@ -49,6 +43,8 @@ namespace InformationFinder
                     Console.WriteLine();
                     if (extractor != null)
                     {
+                        extractor.MatchFounded += observer.OnMatchFounded;
+
                         var emailsThread = new Thread(extractor.SearchEmails);
                         emailsThread.Start();
 
@@ -57,6 +53,8 @@ namespace InformationFinder
 
                         emailsThread.Join();
                         linksThread.Join();
+
+                        extractor.MatchFounded -= observer.OnMatchFounded;
                     }
                 }
             }
