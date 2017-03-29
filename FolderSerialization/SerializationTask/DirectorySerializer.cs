@@ -65,28 +65,21 @@ namespace SerializationTask
         public FolderInfo DeserializeDirectory()
         {
             FolderInfo root = null;
-            if (_directoryPath == null)
+            if (_format == SerializationFormat.XML)
             {
-                if (_format == SerializationFormat.XML)
+                var xmlSerializer = new XmlSerializer(typeof(FolderInfo));
+                using (var stream = new FileStream(_outputFileName, FileMode.Open))
                 {
-                    var xmlSerializer = new XmlSerializer(typeof(FolderInfo));
-                    using (var stream = new FileStream(_outputFileName, FileMode.Open))
-                    {
-                        root = (FolderInfo)xmlSerializer.Deserialize(stream);
-                    }
-                }
-                else
-                {
-                    var binFormatter = new BinaryFormatter();
-                    using (var stream = new FileStream(_outputFileName, FileMode.Open))
-                    {
-                        root = (FolderInfo)binFormatter.Deserialize(stream);
-                    }
+                    root = (FolderInfo)xmlSerializer.Deserialize(stream);
                 }
             }
             else
             {
-                Console.WriteLine("You cannot deserialize directory. Wrong arguments are passed to object.");
+                var binFormatter = new BinaryFormatter();
+                using (var stream = new FileStream(_outputFileName, FileMode.Open))
+                {
+                    root = (FolderInfo)binFormatter.Deserialize(stream);
+                }
             }
             return root;
         }

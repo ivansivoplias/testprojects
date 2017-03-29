@@ -27,7 +27,7 @@ namespace Tests
 
             tempList.Sort();
 
-            _rightLinksAndEmails = string.Join("", tempList);
+            _rightLinksAndEmails = string.Concat(tempList);
 
             _testFilename = GetCurrentDirectory() + "\\Resources\\testInfo.txt";
         }
@@ -53,7 +53,7 @@ namespace Tests
 
             _testData.Sort();
 
-            var testDataString = string.Join("", _testData);
+            var testDataString = string.Concat(_testData);
 
             //Assert
             Assert.AreEqual(_rightLinksAndEmails, testDataString);

@@ -13,7 +13,6 @@ namespace InformationFinder
             bool exit = false;
             string source = null;
             InfoExtractor extractor = null;
-            SearchObserver observer = SearchObserver.Create();
 
             do
             {
@@ -43,7 +42,7 @@ namespace InformationFinder
                     Console.WriteLine();
                     if (extractor != null)
                     {
-                        extractor.MatchFounded += observer.OnMatchFounded;
+                        extractor.MatchFounded += extractor.OnMatchFounded;
 
                         var emailsThread = new Thread(extractor.SearchEmails);
                         emailsThread.Start();
@@ -54,7 +53,7 @@ namespace InformationFinder
                         emailsThread.Join();
                         linksThread.Join();
 
-                        extractor.MatchFounded -= observer.OnMatchFounded;
+                        extractor.MatchFounded -= extractor.OnMatchFounded;
                     }
                 }
             }

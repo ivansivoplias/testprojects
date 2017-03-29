@@ -16,37 +16,18 @@ namespace InformationFinder
         private static readonly Regex _htmlLink = new Regex(@"((http|ftp|https):\/\/|www\.|\/)([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?", DefaultOptions);
         private static readonly Regex _link = new Regex("(https?|ftp)://[^\\s/$.?#].[^\\s]*", DefaultOptions);
 
+        private static readonly string _format = "{0} {1} is founded in {2} at {3}";
+
         private readonly object _lockObject = new object();
         private readonly string _sourceAddress;
         private readonly string _sourceDataString;
 
-        private EventHandler<MatchFondedEventArgs> _matchFounded;
+        public EventHandler<MatchFondedEventArgs> MatchFounded;
 
         private InfoExtractor(string source, string sourceData)
         {
             _sourceAddress = source;
             _sourceDataString = sourceData;
-        }
-
-        public event EventHandler<MatchFondedEventArgs> MatchFounded
-        {
-            add
-            {
-                lock (_lockObject)
-                {
-                    _matchFounded += value;
-                }
-            }
-            remove
-            {
-                lock (_lockObject)
-                {
-                    if (_matchFounded != null)
-                    {
-                        _matchFounded -= value;
-                    }
-                }
-            }
         }
 
         public static InfoExtractor Create(string source)
@@ -123,7 +104,7 @@ namespace InformationFinder
                 Match match = regex.Match(line);
                 while (match.Success)
                 {
-                    _matchFounded(this, new MatchFondedEventArgs(_sourceAddress, match.Value, type));
+                    MatchFounded(this, new MatchFondedEventArgs(_sourceAddress, match.Value, type));
                     match = match.NextMatch();
                     Thread.Sleep(1);
                 }
@@ -132,6 +113,17 @@ namespace InformationFinder
             {
                 Console.WriteLine("Source is empty or reading was not successful. Please input new source and try again.");
             }
+        }
+
+        public void OnMatchFounded(object sender, MatchFondedEventArgs e)
+        {
+            var founded = e.Founded;
+            if (founded.Length > 80)
+            {
+                founded = string.Format("{0} ... ", founded.Substring(0, 80));
+            }
+            Console.WriteLine(_format, e.Match, founded, e.Source, DateTime.Now.ToShortDateString());
+            Console.WriteLine();
         }
     }
 }
