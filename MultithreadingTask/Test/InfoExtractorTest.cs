@@ -1,9 +1,7 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using InformationFinder;
+using Test.Properties;
 
 namespace Tests
 {
@@ -12,24 +10,21 @@ namespace Tests
     {
         private string _rightLinksAndEmails;
         private List<string> _testData;
-        private string _testFilename;
+        private string _testText;
 
         [SetUp]
         public void Setup()
         {
-            var tempList = new List<string>() {
+            var tempList = new SortedSet<string>() {
                  "http://www.youtube.com",
                 "www.youtube.com",
-                "/youtube.com",
                 "ivansila@gmail.com",
                 "alexashka2551ywna@yandex.com"
             };
 
-            tempList.Sort();
-
             _rightLinksAndEmails = string.Concat(tempList);
 
-            _testFilename = GetCurrentDirectory() + "\\Resources\\testInfo.txt";
+            _testText = Resources.testInfo;
         }
 
         public void TestObserver(object sender, MatchFondedEventArgs e)
@@ -42,7 +37,7 @@ namespace Tests
         {
             //Arrange
             _testData = new List<string>();
-            var infoExtractor = InfoExtractor.Create(_testFilename);
+            var infoExtractor = InfoExtractor.CreateFromText(_testText);
             infoExtractor.MatchFounded += TestObserver;
 
             //Act
@@ -57,14 +52,6 @@ namespace Tests
 
             //Assert
             Assert.AreEqual(_rightLinksAndEmails, testDataString);
-        }
-
-        public string GetCurrentDirectory()
-        {
-            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            UriBuilder uri = new UriBuilder(codeBase);
-            string path = Uri.UnescapeDataString(uri.Path);
-            return Path.GetDirectoryName(path);
         }
     }
 }

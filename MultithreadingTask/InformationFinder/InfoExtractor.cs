@@ -13,12 +13,9 @@ namespace InformationFinder
         private const RegexOptions DefaultOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
         private static readonly Regex _emailRegex = new Regex("[a-zA-Z0-9\\.\\-_]+@([a-z0-9\\-]\\.?)+\\.([a-z0-9\\-])+", DefaultOptions);
-        private static readonly Regex _htmlLink = new Regex(@"((http|ftp|https):\/\/|www\.|\/)([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?", DefaultOptions);
+        private static readonly Regex _htmlLink = new Regex(@"([^\w\s\S]|\b)((http|ftp|https):\/\/|www\.)([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?", DefaultOptions);
         private static readonly Regex _link = new Regex("(https?|ftp)://[^\\s/$.?#].[^\\s]*", DefaultOptions);
 
-        private static readonly string _format = "{0} {1} is founded in {2} at {3}";
-
-        private readonly object _lockObject = new object();
         private readonly string _sourceAddress;
         private readonly string _sourceDataString;
 
@@ -47,6 +44,15 @@ namespace InformationFinder
             }
 
             return new InfoExtractor(source, resultStr);
+        }
+
+        public static InfoExtractor CreateFromText(string text)
+        {
+            if (!string.IsNullOrEmpty(text))
+            {
+                return new InfoExtractor(string.Empty, text);
+            }
+            throw new ArgumentException("Text is null or empty. Please pass valid text and try again.");
         }
 
         public void SearchEmails()
@@ -113,17 +119,6 @@ namespace InformationFinder
             {
                 Console.WriteLine("Source is empty or reading was not successful. Please input new source and try again.");
             }
-        }
-
-        public void OnMatchFounded(object sender, MatchFondedEventArgs e)
-        {
-            var founded = e.Founded;
-            if (founded.Length > 80)
-            {
-                founded = string.Format("{0} ... ", founded.Substring(0, 80));
-            }
-            Console.WriteLine(_format, e.Match, founded, e.Source, DateTime.Now.ToShortDateString());
-            Console.WriteLine();
         }
     }
 }
