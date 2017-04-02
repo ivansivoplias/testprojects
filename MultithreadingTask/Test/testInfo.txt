@@ -1,5 +1,0 @@
-﻿"http://www.youtube.com",
-"www.youtube.com",
-"/youtube.com",
-"ivansila@gmail.com",
-"alexashka2551ywna@yandex.com"
