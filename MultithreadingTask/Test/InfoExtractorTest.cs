@@ -1,30 +1,25 @@
 ﻿using NUnit.Framework;
 using System.Collections.Generic;
 using InformationFinder;
-using Test.Properties;
 
 namespace Tests
 {
     [TestFixture]
     public class InfoExtractorTest
     {
-        private string _rightLinksAndEmails;
-        private List<string> _testData;
-        private string _testText;
+        private SortedSet<string> _expectedResult;
+        private SortedSet<string> _testData;
 
         [SetUp]
         public void Setup()
         {
-            var tempList = new SortedSet<string>() {
+            _expectedResult = new SortedSet<string>() {
                  "http://www.youtube.com",
                 "www.youtube.com",
                 "ivansila@gmail.com",
-                "alexashka2551ywna@yandex.com"
+                "alexashka2551ywna@yandex.com",
+                "ddh@next.site.org"
             };
-
-            _rightLinksAndEmails = string.Concat(tempList);
-
-            _testText = Resources.testInfo;
         }
 
         public void TestObserver(object sender, MatchFondedEventArgs e)
@@ -36,8 +31,8 @@ namespace Tests
         public void InfoFindingTest()
         {
             //Arrange
-            _testData = new List<string>();
-            var infoExtractor = InfoExtractor.CreateFromText(_testText);
+            _testData = new SortedSet<string>();
+            var infoExtractor = InfoExtractor.CreateFromText(Test.Properties.Resources.testInfo);
             infoExtractor.MatchFounded += TestObserver;
 
             //Act
@@ -46,12 +41,8 @@ namespace Tests
 
             infoExtractor.MatchFounded -= TestObserver;
 
-            _testData.Sort();
-
-            var testDataString = string.Concat(_testData);
-
             //Assert
-            Assert.AreEqual(_rightLinksAndEmails, testDataString);
+            Assert.AreEqual(_expectedResult, _testData);
         }
     }
 }

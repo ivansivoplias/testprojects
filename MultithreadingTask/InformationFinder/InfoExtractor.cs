@@ -12,10 +12,11 @@ namespace InformationFinder
         public const string EmailMatchType = "E-mail";
         private const RegexOptions DefaultOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
-        private static readonly Regex _emailRegex = new Regex("[a-zA-Z0-9\\.\\-_]+@([a-z0-9\\-]\\.?)+\\.([a-z0-9\\-])+", DefaultOptions);
-        private static readonly Regex _htmlLink = new Regex(@"([^\w\s\S]|\b)((http|ftp|https):\/\/|www\.)([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?", DefaultOptions);
-        private static readonly Regex _link = new Regex("(https?|ftp)://[^\\s/$.?#].[^\\s]*", DefaultOptions);
+        private static readonly Regex _emailRegex = new Regex(@"[\w\.\-\+']+@([\w\-\+']\.?)+\.([\w\-])+", DefaultOptions);
+        private static readonly Regex _htmlLink = new Regex(@"\b((http|ftp|https):\/\/|www\.)([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?", DefaultOptions);
+        private static readonly Regex _link = new Regex(@"(https?|ftp)://[^\s/$.?#].[^\s]*", DefaultOptions);
 
+        private readonly object _lockObject = new object();
         private readonly string _sourceAddress;
         private readonly string _sourceDataString;
 
@@ -52,7 +53,10 @@ namespace InformationFinder
             {
                 return new InfoExtractor(string.Empty, text);
             }
-            throw new ArgumentException("Text is null or empty. Please pass valid text and try again.");
+            else
+            {
+                throw new ArgumentException("Text is null or empty. Please input text and try again");
+            }
         }
 
         public void SearchEmails()

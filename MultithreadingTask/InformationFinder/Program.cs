@@ -13,15 +13,11 @@ namespace InformationFinder
             Console.OutputEncoding = Encoding.UTF8;
             Console.InputEncoding = Encoding.GetEncoding("windows-1251");
             bool exit = false;
-            string source = null;
-            InfoExtractor extractor = null;
 
             do
             {
                 Console.WriteLine("Input path to file or url to start searching...");
-                source = Console.ReadLine();
-
-                source = source.Trim().Trim('\"', '\'');
+                string source = Console.ReadLine().Trim().Trim('\"', '\'');
 
                 if (source.Equals("exit", StringComparison.CurrentCultureIgnoreCase))
                 {
@@ -30,20 +26,10 @@ namespace InformationFinder
 
                 if (!exit)
                 {
-                    extractor = null;
-
                     try
                     {
-                        extractor = InfoExtractor.Create(source);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("Something gone wrong while creating searcher object. See details below: \n{0}", e.Message);
-                    }
+                        InfoExtractor extractor = InfoExtractor.Create(source);
 
-                    Console.WriteLine();
-                    if (extractor != null)
-                    {
                         extractor.MatchFounded += OnMatchFounded;
 
                         var emailsThread = new Thread(extractor.SearchEmails);
@@ -57,6 +43,12 @@ namespace InformationFinder
 
                         extractor.MatchFounded -= OnMatchFounded;
                     }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("An error has occurred in a process. See details below: \n{0}", e.Message);
+                    }
+
+                    Console.WriteLine();
                 }
             }
             while (!exit);
